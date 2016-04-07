@@ -1,0 +1,21 @@
+application: cloud-vision-slackbot
+runtime: python27
+api_version: 1
+threadsafe: true
+
+handlers:
+- url: .*
+  script: helloworld.app
+
+libraries:
+- name: endpoints
+  version: 1.0
+
+- name: webapp2
+  version: "2.5.2"
+
+- name: jinja2
+  version: latest
+
+- name: PIL
+  version: latest

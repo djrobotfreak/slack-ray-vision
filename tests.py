@@ -1,10 +1,10 @@
 import webapp2
-from entities import *
+import time
 
 class DBQuery(webapp2.RedirectHandler):
     def get(self):
-        Image().query().get(use_cache=False, use_memcache=False)  # gets random image and loads from db. Just to test a long task.
-        self.response.write("Loaded Image!")
+        time.sleep(0.5)  # Some long process
+        self.response.write("Finished!")
 
 class HowdyWorld(webapp2.RedirectHandler):
     def get(self):
@@ -13,5 +13,4 @@ class HowdyWorld(webapp2.RedirectHandler):
 handler = webapp2.WSGIApplication([
     ('/test/howdyworld', HowdyWorld),
     ('/test/dbquery', DBQuery),
-
 ], debug=True)

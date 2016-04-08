@@ -24,7 +24,7 @@ def get_slack_image_files(channel_id, ts_from=0, page=1):
         "page": page,
         "channel": channel_id
     })
-    logging.info("Calling files.list url: " + url_with_params)
+    logging.info("files.list Request URL:  " + url_with_params)
     response = urlfetch.fetch(url_with_params)
     if response.status_code != 200:
         logging.error("files.list call failed. Response: " + response.content)
@@ -38,19 +38,16 @@ def get_slack_image_files(channel_id, ts_from=0, page=1):
         paging = files_data['paging']
     return files, paging
 
-
 def get_last_image_ts(channel_id):
     ts = memcache.get(channel_id + ":" + 'timestamp')
     if ts is not None:
         return ts
     return 0
 
-
 def set_last_image_ts(channel_id, ts):
-    ts = memcache.set(key=channel_id + ":" + 'timestamp', value=ts)
+    memcache.set(key=channel_id + ":" + 'timestamp', value=ts)
 
-
-
+# Gets image from slack storage, converts it to base64 string, sends it to google cloud vision for analysis
 def send_url_to_cloudvision(url, slack_token=DEREK_SLACK_TOKEN):
     image_response = urlfetch.fetch(url, headers={"Authorization": "Bearer " + slack_token})
     image_content = base64.b64encode(image_response.content)
@@ -66,32 +63,33 @@ def send_url_to_cloudvision(url, slack_token=DEREK_SLACK_TOKEN):
         }]
     })
     response = service_request.execute()
+    if response.status_code > 299:  # Error response
+        logging.error("Google Cloud Vision API call failed")
+        return []
     img_labels = []
-    logging.info(str(response))
     try:
         for label in response['responses'][0]['labelAnnotations']:
             img_labels.append(label['description'])
+
+        logging.info("Labels found: " + str(img_labels))
     except:
         logging.info("No labels found for image: " + url)
-    logging.info("Labels found: " + str(img_labels))
     return img_labels
 
 
-
 def send_reaction(_file, token=SLACK_BOT_TOKEN):
-    logging.info("Sending reaction for file id" + _file['id'])
+    logging.info("Sending reaction for file: " + _file['id'])
     file_id = _file['id']
     url = 'https://slack.com/api/reactions.add?' + urllib.urlencode(
         {'token': token, 'file': file_id, 'name': 'camera'})
     response = urlfetch.fetch(url)
     if response.status_code != 200:
-        logging.info("Send response failed with: " + response.status_code + ": " + str(response.content))
-
+        logging.error("Reactions.add Request Failed: " + ": " + str(response.content))
 
 
 def process_new_images(message_values):
-
     ts = get_last_image_ts(message_values['channel_id'])
+    # TODO: make more requests for when there are more pages
     files, paging = get_slack_image_files(channel_id=message_values["channel_id"],
                                           ts_from=ts,
                                           page=1)
@@ -102,7 +100,7 @@ def process_new_images(message_values):
         team.team_id = message_values["team_id"]
         team.put()
     for _file in files:
-        logging.info("dealing with file:" + _file["id"])
+        logging.info("Dealing with file: " + _file["id"])
         image = Image.query(Image.private_url == _file['url_private']).get()
         if image:
             continue
@@ -114,17 +112,15 @@ def process_new_images(message_values):
         image.tags = send_url_to_cloudvision(image.private_url)
         image.put()
         if str(ts) < str(image.ts):
-            set_last_image_ts(message_values['channel_id'], str(image.ts))
+            set_last_image_ts(message_values['channel_id'], str(image.ts))  # Sets memcache timestamp
         send_reaction(_file)
-        logging.info("completed one file successfully!!!")
-
-
 
 
 class ImageTaskHandler(webapp2.RequestHandler):
     def post(self):
         values = self.request.params
-        time.sleep(15)
+        time.sleep(15)  # Stupid slack sometimes takes up to 15 seconds
+        #  to add image to files api after message post
         process_new_images(values)
         self.response.write("OK")
 

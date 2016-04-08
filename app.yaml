@@ -5,7 +5,6 @@ api_version: 1
 threadsafe: true
 
 handlers:
-
 - url: /tasks/.*
   script: tasks.handler
   login: admin
@@ -13,12 +12,13 @@ handlers:
 - url: /loaderio-baff6ef8072d19556bfaee0ee03fc39b/
   script: main.handler
 
+- url: /test/.*
+  script: tests.handler
+
+# Request handler for anything else
 - url: .*
   script: main.handler
   secure: always
-
-- url: /test/.*
-  script: tests.handler
 
 libraries:
 - name: endpoints

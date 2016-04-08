@@ -10,8 +10,15 @@ handlers:
   script: tasks.handler
   login: admin
 
+- url: /loaderio-baff6ef8072d19556bfaee0ee03fc39b/
+  script: main.handler
+
 - url: .*
   script: main.handler
+  secure: always
+
+- url: /test/.*
+  script: tests.handler
 
 libraries:
 - name: endpoints

@@ -78,6 +78,6 @@ class LoaderTest(webapp2.RedirectHandler):
 handler = webapp2.WSGIApplication([
     ('/slack/outgoing-web-hook', SlackMessageHandler),
     ('/howdyworld', HowdyWorld),
-    ('/loaderio-baff6ef8072d19556bfaee0ee03fc39b', LoaderTest)
+    ('/loaderio-baff6ef8072d19556bfaee0ee03fc39b/', LoaderTest)
 
 ], debug=True)

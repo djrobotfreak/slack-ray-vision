@@ -1,11 +1,17 @@
 application: cloud-vision-slackbot
+version: 1
 runtime: python27
 api_version: 1
 threadsafe: true
 
 handlers:
+
+- url: /tasks/.*
+  script: tasks.handler
+  login: admin
+
 - url: .*
-  script: helloworld.app
+  script: main.handler
 
 libraries:
 - name: endpoints
@@ -18,4 +24,10 @@ libraries:
   version: latest
 
 - name: PIL
+  version: latest
+
+- name: ssl
+  version: latest
+
+- name: pycrypto
   version: latest

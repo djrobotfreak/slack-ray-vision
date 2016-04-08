@@ -1,0 +1,11 @@
+indexes:
+- kind: Image
+  properties:
+  - name: channel_id
+  - name: ts
+
+- kind: Image
+  properties:
+  - name: channel_id
+  - name: ts
+    direction: desc

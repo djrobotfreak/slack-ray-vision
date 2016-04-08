@@ -38,14 +38,18 @@ def get_slack_image_files(channel_id, ts_from=0, page=1):
         paging = files_data['paging']
     return files, paging
 
+
 def get_last_image_ts(channel_id):
     ts = memcache.get(channel_id + ":" + 'timestamp')
     if ts is not None:
         return ts
     return 0
 
+
 def set_last_image_ts(channel_id, ts):
     ts = memcache.set(key=channel_id + ":" + 'timestamp', value=ts)
+
+
 
 def send_url_to_cloudvision(url, slack_token=DEREK_SLACK_TOKEN):
     image_response = urlfetch.fetch(url, headers={"Authorization": "Bearer " + slack_token})
@@ -72,6 +76,8 @@ def send_url_to_cloudvision(url, slack_token=DEREK_SLACK_TOKEN):
     logging.info("Labels found: " + str(img_labels))
     return img_labels
 
+
+
 def send_reaction(_file, token=SLACK_BOT_TOKEN):
     logging.info("Sending reaction for file id" + _file['id'])
     file_id = _file['id']
@@ -80,6 +86,8 @@ def send_reaction(_file, token=SLACK_BOT_TOKEN):
     response = urlfetch.fetch(url)
     if response.status_code != 200:
         logging.info("Send response failed with: " + response.status_code + ": " + str(response.content))
+
+
 
 def process_new_images(message_values):
 
@@ -109,6 +117,9 @@ def process_new_images(message_values):
             set_last_image_ts(message_values['channel_id'], str(image.ts))
         send_reaction(_file)
         logging.info("completed one file successfully!!!")
+
+
+
 
 class ImageTaskHandler(webapp2.RequestHandler):
     def post(self):

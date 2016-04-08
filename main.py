@@ -67,12 +67,17 @@ class SlackMessageHandler(webapp2.RequestHandler):
         get_some_images(values)
         self.response.write("OK")
 
-class ImageSearch(webapp2.RedirectHandler):
-    def post(self):
-        logging.info("Request Body: " + str(self.request.body))
-        self.response.write("No images found.")
+class HowdyWorld(webapp2.RedirectHandler):
+    def get(self):
+        self.response.write("Howdy!")
+
+class LoaderTest(webapp2.RedirectHandler):
+    def get(self):
+        self.response.write("loaderio-baff6ef8072d19556bfaee0ee03fc39b")
 
 handler = webapp2.WSGIApplication([
     ('/slack/outgoing-web-hook', SlackMessageHandler),
-    ('/imagesearch', ImageSearch)
+    ('/howdyworld', HowdyWorld),
+    ('/loaderio-baff6ef8072d19556bfaee0ee03fc39b', LoaderTest)
+
 ], debug=True)
